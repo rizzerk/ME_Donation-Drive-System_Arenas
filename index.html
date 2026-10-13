@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title> Donation Drive Management System </title>
+</head>
+<body>
+
+    <h1> Donation Drive Management System.</h1>
+
+    <p id="message"></p>
+
+    <h2>All Donations</h2>
+    <p id="rem"> </p> 
+    <button onclick="loadCampaigns()">View All</button>
+    <ul id="campaignList"></ul>
+
+    <h2>Search by ID</h2>
+    <input type="number" id="searchId" placeholder="Enter ID">
+    <button onclick="searchCampaign()">Search</button>
+    <p id="searchResult"></p>
+
+    <h2>Add Donation Campaign</h2>
+    <input type="text" id="campaign_name" placeholder="Campaign name">
+    <input type="number" id="target_amount" placeholder="Target Amount" min="0">
+    <input type="number" id="collected_amount" placeholder="Collected Amount" min="0">
+    <input type="date" id="deadline">
+    <button onclick="addCampaign()">Add</button>
+
+    <script>
+        const API = "/api/campaigns";
+  
+        function showMessage(text) {
+            document.getElementById("message").textContent = text;
+        }
+
+        // one line of text for a campaign
+        function campaignText(campaign) {
+            const remaining = campaign.target_amount - campaign.collected_amount;
+            return campaign.id + " - " + campaign.campaign_name + " | " + campaign.deadline + 
+                " | Target Amount: " + campaign.target_amount + 
+                " | Collected Amount: " + campaign.collected_amount + 
+                " | Remaining: " + remaining + " ";
+        }
+
+
+
+        // VIEW ALL  -> GET /api/campaigns
+        async function loadCampaigns() {
+            const response = await fetch(API);
+            const campaigns = await response.json();
+
+            var total_ta = 0;
+            var total_c = 0;
+
+            const list = document.getElementById("campaignList");
+            list.innerHTML = "";
+
+            campaigns.forEach(campaign => {
+
+
+                const item = document.createElement("li");
+                item.textContent = campaignText(campaign);
+
+
+                const deleteBtn = document.createElement("button");
+                deleteBtn.textContent = "Delete";
+                deleteBtn.onclick = () => deleteCampaign(campaign.id);
+
+                item.appendChild(deleteBtn);
+                list.appendChild(item);
+            });
+
+        }
+
+
+
+
+        // SEARCH  -> GET /api/campaigns/:id
+        async function searchCampaign() {
+            const id = document.getElementById("searchId").value;
+            const result = document.getElementById("searchResult");
+
+            if (id === "") {
+                result.textContent = "Please enter an ID";
+                return;
+            }
+
+            const response = await fetch(API + "/" + id);
+            const data = await response.json();
+
+            if (!response.ok) {
+                result.textContent = data.message;   // "Campaign not found"
+                return;
+            }
+
+            result.textContent = campaignText(data);
+        }
+
+        // ADD  -> POST /api/campaigns
+        async function addCampaign() {
+            const newCampaign = {
+                campaign_name: document.getElementById("campaign_name").value,
+                target_amount: document.getElementById("target_amount").value,
+                collected_amount: document.getElementById("collected_amount").value,
+                deadline: document.getElementById("deadline").value,
+            };
+
+            const response = await fetch(API, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(newCampaign)
+            });
+            const data = await response.json();
+
+            if (!response.ok) {
+                showMessage(data.message);  
+                return;
+            }
+
+            showMessage("Added: " + data.campaign_name);
+            document.getElementById("campaign_name").value = "";
+            document.getElementById("target_amount").value = "";
+            document.getElementById("collected_amount").value = "";
+            document.getElementById("deadline").value = "";
+            loadCampaigns();
+        }
+
+        // DELETE  -> DELETE /api/campaigns/:id
+        async function deleteCampaign(id) {
+            const response = await fetch(API + "/" + id, { method: "DELETE" });
+            const data = await response.json();
+
+            showMessage(data.message);   // "Campaign deleted" or the error
+            loadCampaigns();
+        }
+
+        loadCampaigns();
+    </script>
+
+</body>
+</html>

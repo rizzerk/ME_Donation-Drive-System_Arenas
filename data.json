@@ -1,0 +1,30 @@
+[
+  {
+    "id": 1,
+    "campaign_name": "Campaign nako",
+    "target_amount": 70000,
+    "collected_amount": 1500,
+    "deadline": "2027-11-05"
+  },
+  {
+    "id": 2,
+    "campaign_name": "Campaign nimo",
+    "target_amount": 20000,
+    "collected_amount": 2730,
+    "deadline": "2026-12-25"
+  },
+  {
+    "id": 3,
+    "campaign_name": "Dili ni Campaign",
+    "target_amount": 18276253,
+    "collected_amount": 23233,
+    "deadline": "2027-02-24"
+  },
+  {
+    "id": 4,
+    "campaign_name": "Go Grow Glow",
+    "target_amount": 2334566,
+    "collected_amount": 34455,
+    "deadline": "2027-05-26"
+  }
+]
